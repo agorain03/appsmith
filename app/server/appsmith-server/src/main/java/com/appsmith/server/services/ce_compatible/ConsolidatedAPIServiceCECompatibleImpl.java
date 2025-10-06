@@ -19,6 +19,7 @@ import com.appsmith.server.services.UserService;
 import com.appsmith.server.services.ce.ConsolidatedAPIServiceCEImpl;
 import com.appsmith.server.themes.base.ThemeService;
 import io.micrometer.observation.ObservationRegistry;
+import org.springframework.web.reactive.function.client.WebClient;
 
 public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServiceCEImpl
         implements ConsolidatedAPIServiceCECompatible {
@@ -40,7 +41,8 @@ public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServi
             MockDataService mockDataService,
             ObservationRegistry observationRegistry,
             CacheableRepositoryHelper cacheableRepositoryHelper,
-            ObservationHelper observationHelper) {
+            ObservationHelper observationHelper,
+            WebClient.Builder webClientBuilder) {
         super(
                 sessionUserService,
                 userService,
@@ -59,6 +61,7 @@ public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServi
                 mockDataService,
                 observationRegistry,
                 cacheableRepositoryHelper,
-                observationHelper);
+                observationHelper,
+                webClientBuilder);
     }
 }

@@ -12,6 +12,5 @@ node_modules
 **/.project
 **/.factorypath
 container-volumes
-*.env*
 dependency-reduced-pom.xml
 appsmith-server/failedServerTests.txt

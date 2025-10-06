@@ -5,6 +5,7 @@ import com.appsmith.external.views.Views;
 import com.appsmith.server.constants.FieldName;
 import com.appsmith.server.constants.Url;
 import com.appsmith.server.domains.ApplicationMode;
+import com.appsmith.server.dtos.AddPageAccessRequest;
 import com.appsmith.server.dtos.ApplicationPagesDTO;
 import com.appsmith.server.dtos.CRUDPageResourceDTO;
 import com.appsmith.server.dtos.CRUDPageResponseDTO;
@@ -14,6 +15,7 @@ import com.appsmith.server.dtos.PageUpdateDTO;
 import com.appsmith.server.dtos.ResponseDTO;
 import com.appsmith.server.newpages.base.NewPageService;
 import com.appsmith.server.services.ApplicationPageService;
+import com.appsmith.server.services.UserPageAccessService;
 import com.appsmith.server.solutions.CreateDBTablePageSolution;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +47,7 @@ public class PageControllerCE {
     private final ApplicationPageService applicationPageService;
     private final NewPageService newPageService;
     private final CreateDBTablePageSolution createDBTablePageSolution;
+    private final UserPageAccessService service;
 
     @JsonView(Views.Public.class)
     @PostMapping
@@ -53,6 +57,33 @@ public class PageControllerCE {
         return applicationPageService
                 .createPage(page.toPageDTO())
                 .map(created -> new ResponseDTO<>(HttpStatus.CREATED, created));
+    }
+
+    @JsonView(Views.Public.class)
+    @GetMapping("/publishedPages/all/applications")
+    public Mono<ResponseDTO<List<Map<String, String>>>> getAllPublishedPagesAllApplications(
+            @RequestParam(name = "excludeHidden", defaultValue = "true") boolean excludeHidden) {
+        return applicationPageService
+                .getAllPublishedPagesAllApplications(excludeHidden)
+                .map(list -> {
+                    List<Map<String, String>> payload = list.stream()
+                            .map(dto -> Map.of(
+                                    "page_id", dto.getPageId(),
+                                    "page_name", dto.getPageName()))
+                            .toList();
+                    return new ResponseDTO<>(HttpStatus.OK, payload);
+                });
+    }
+
+    @PostMapping("/test-post")
+    @JsonView(Views.Public.class)
+    public Mono<ResponseDTO<Map<String, Object>>> addPageAccess(@Validated @RequestBody AddPageAccessRequest request) {
+        return service.addPageAccess(request.getUserId(), request.getPageId())
+                .map(doc -> new ResponseDTO<>(
+                        HttpStatus.OK,
+                        Map.of(
+                                "userId", doc.getUserId(),
+                                "accessiblePageIds", doc.getAccessiblePageIds())));
     }
 
     @JsonView(Views.Public.class)

@@ -32,6 +32,7 @@ import com.appsmith.server.dtos.CustomJSLibContextDTO;
 import com.appsmith.server.dtos.PageDTO;
 import com.appsmith.server.dtos.PageNameIdDTO;
 import com.appsmith.server.dtos.PluginTypeAndCountDTO;
+import com.appsmith.server.dtos.PublishedPageSummaryDTO;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.exceptions.AppsmithException;
 import com.appsmith.server.helpers.CommonGitFileUtils;
@@ -95,8 +96,10 @@ import static com.appsmith.external.constants.spans.ce.PageSpanCE.FETCH_PAGES_BY
 import static com.appsmith.external.constants.spans.ce.PageSpanCE.MIGRATE_DSL;
 import static com.appsmith.server.acl.AclPermission.MANAGE_APPLICATIONS;
 import static com.appsmith.server.constants.CommonConstants.EVALUATION_VERSION;
+import static com.appsmith.server.constants.ce.CommonConstantsCE.EVALUATION_VERSION;
 import static com.appsmith.server.helpers.ObservationUtils.getQualifiedSpanName;
 import static com.appsmith.server.helpers.ce.PolicyUtil.policyMapToSet;
+import static com.appsmith.server.repositories.ce.BaseAppsmithRepositoryCEImpl.notDeleted;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Slf4j
@@ -246,6 +249,34 @@ public class ApplicationPageServiceCEImpl implements ApplicationPageServiceCE {
         }
         page.setLayouts(layouts);
         return page;
+    }
+
+    @Override
+    public Mono<List<PublishedPageSummaryDTO>> getAllPublishedPagesAllApplications(boolean excludeHidden) {
+        // WARNING: This intentionally ignores ACL by not supplying any permission constraint.
+        return applicationRepository
+                .queryBuilder()
+                .criteria(notDeleted()) // Only non-deleted applications
+                .all()
+                .flatMap(application -> {
+                    var publishedPages = application.getPublishedPages();
+                    if (publishedPages == null || publishedPages.isEmpty()) {
+                        return Flux.<PublishedPageSummaryDTO>empty();
+                    }
+                    return Flux.fromIterable(publishedPages).flatMap(appPage -> newPageRepository
+                            .findById(appPage.getId()) // no permission check
+                            .filter(np -> np != null && np.getPublishedPage() != null)
+                            .filter(np -> {
+                                if (!excludeHidden) return true;
+                                return Boolean.FALSE.equals(
+                                        np.getPublishedPage().getIsHidden());
+                            })
+                            .map(np -> new PublishedPageSummaryDTO(
+                                    np.getId(),
+                                    application.getName() + "_"
+                                            + np.getPublishedPage().getName())));
+                })
+                .collectList();
     }
 
     @Override

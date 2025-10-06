@@ -107,6 +107,7 @@ public enum AppsmithErrorCode {
             "AE-JSN-5001", "Artifact import failed due to a duplicate key conflict during write operation"),
     INVALID_LOGIN_METHOD("AE-LGN-4000", "Invalid login method"),
     PLUGIN_NOT_INSTALLED("AE-PLG-4001", "Plugin not installed"),
+    UNAUTH_API("AE-ACL-4003", "Unauthorized to access the API"),
     PLUGIN_ID_NOT_GIVEN("AE-PLG-4002", "Plugin id not given"),
     PLUGIN_RUN_FAILED("AE-PLG-5003", "Plugin run failed"),
     INVALID_PASSWORD_RESET("AE-PSW-4000", "Invalid password reset"),
