@@ -16,6 +16,9 @@ import { isPermitted, PERMISSION_TYPE } from "ee/utils/permissionHelpers";
 import { builderURL } from "ee/RouteBuilder";
 import { getCanvasWidgetsStructure } from "ee/selectors/entitiesSelector";
 import equal from "fast-deep-equal/es6";
+import { getCurrentUser } from "selectors/usersSelectors";
+import { selectUserPageAccessState, selectHasAccessToPage } from "ee/selectors/userPageAccessSelectors";
+
 
 const Section = styled.section`
   height: 100%;
@@ -34,7 +37,28 @@ function AppViewerPageContainer(props: AppViewerPageContainerProps) {
   const canvasWidth = useSelector(getCanvasWidth);
   const isFetchingPage = useSelector(getIsFetchingPage);
   const currentApplication = useSelector(getCurrentApplication);
+  const currentUser = useSelector(getCurrentUser);
   const { match } = props;
+
+  // Current user (for email / id)
+  const userEmail = currentUser?.email || "";
+  const pageId = match.params.basePageId || "";
+  const userPageAccessState = useSelector(selectUserPageAccessState);
+  const hasAccessSelector = useMemo(
+    () => selectHasAccessToPage(userEmail, pageId),
+    [userEmail, pageId],
+  );
+  const hasAccess = useSelector(hasAccessSelector);
+
+  const unauthorized = (
+    <Centered data-testid="t--app-viewer-unauthorized">
+      <NonIdealState
+        icon={<Icon icon="lock" iconSize={theme.fontSizes[9]} />}
+        title="Unauthorized"
+        description="You do not have access to view this page."
+      />
+    </Centered>
+  );
 
   // get appsmith editr link
   const appsmithEditorLink = useMemo(() => {
@@ -82,10 +106,26 @@ function AppViewerPageContainer(props: AppViewerPageContainerProps) {
     </Centered>
   );
 
+  console.log("hasAccess", hasAccess);
+
+  if (!hasAccess) {
+    return unauthorized;
+  }
+
   if (isFetchingPage) return pageLoading;
+
+  // if (!userPageAccessState.loaded && userPageAccessState.loading) {
+  //   return pageLoading;
+  // }
+
+  
 
   if (!(widgetsStructure.children && widgetsStructure.children.length > 0))
     return pageNotFound;
+
+  
+
+  
 
   return (
     <Section>

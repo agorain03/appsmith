@@ -6,6 +6,7 @@ import { PluginType } from "../../../entities/Plugin";
 import { getIsAnvilEnabledInCurrentApplication } from "../../../layoutSystems/anvil/integrations/selectors";
 
 function useHandleRunClick() {
+  console.log("I AM ON RUN PLUGIN ACTION")
   const { action, plugin } = usePluginActionContext();
   const dispatch = useDispatch();
   const isAnvilEnabled = useSelector(getIsAnvilEnabledInCurrentApplication);

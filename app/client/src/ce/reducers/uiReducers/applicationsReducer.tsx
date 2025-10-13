@@ -39,6 +39,7 @@ export const initialState: ApplicationsReduxState = {
   importedApplication: null,
   isImportAppModalOpen: false,
   workspaceIdForImport: null,
+  isUnauthPage: false,
   pageIdForImport: "",
   isAppSidebarPinned: true,
   isSavingNavigationSetting: false,
@@ -60,6 +61,16 @@ export const initialState: ApplicationsReduxState = {
 };
 
 export const handlers = {
+  [ReduxActionTypes.UNAUTH_PAGE]: (
+    state: ApplicationsReduxState,
+  ) => {
+    return { ...state, isUnauthPage: true };
+  },
+  [ReduxActionTypes.AUTH_PAGE]: (
+    state: ApplicationsReduxState,
+  ) => {
+    return { ...state, isUnauthPage: false };
+  },
   [ReduxActionTypes.DELETE_APPLICATION_INIT]: (
     state: ApplicationsReduxState,
   ) => {
@@ -765,6 +776,7 @@ export interface ApplicationsReduxState {
   importingApplication: boolean;
   importedApplication: unknown;
   isImportAppModalOpen: boolean;
+  isUnauthPage: boolean;
   // TODO: Fix this the next time the file is edited
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   workspaceIdForImport: any;

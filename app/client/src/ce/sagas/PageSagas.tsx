@@ -159,6 +159,10 @@ import { handleFetchApplicationError } from "./ApplicationSagas";
 import { getCurrentUser } from "actions/authActions";
 import { getIsFirstPageLoad } from "selectors/evaluationSelectors";
 
+// USER PAGE ACCESS INTEGRATION: imports
+import { fetchUserPageAccess } from "actions/userPageAccessActions";
+import { selectUserPageAccessState } from "selectors/userPageAccessSelector";
+
 export interface HandleWidgetNameUpdatePayload {
   newName: string;
   widgetName: string;
@@ -389,7 +393,17 @@ export function* fetchPublishedPageSaga(
   action: ReduxAction<FetchPublishedPageActionPayload>,
 ) {
   try {
+    console.log("fetchPublishedPageSaga called ======================");
     const { bustCache, pageId, pageWithMigratedDsl } = action.payload;
+
+    // USER PAGE ACCESS INTEGRATION (view mode)
+    const accessState = (yield select(
+    selectUserPageAccessState,
+  )) as ReturnType<typeof selectUserPageAccessState>;
+
+  if (!accessState.loaded && !accessState.loading) {
+    yield put(fetchUserPageAccess());
+  }
 
     const params = { pageId, bustCache };
     const response: FetchPageResponse = yield call(
@@ -417,9 +431,20 @@ export function* fetchPublishedPageSaga(
 
 export function* fetchPublishedPageResourcesSaga(
   action: ReduxAction<FetchPublishedPageResourcesPayload>,
-) {
+) : Generator {
   try {
+    console.log("[UserPageAccess] Saga triggered");
     const { basePageId, branch: branchName, pageId } = action.payload;
+    console.log("fetchPublishedPageResourcesSaga called ++++++++++");
+
+    // USER PAGE ACCESS INTEGRATION (view mode)
+    const accessState = (yield select(
+    selectUserPageAccessState,
+  )) as ReturnType<typeof selectUserPageAccessState>;
+
+  // if (!accessState.loaded && !accessState.loading) {
+    yield put(fetchUserPageAccess());
+  // }
 
     const initConsolidatedApiResponse: ApiResponse<InitConsolidatedApi> =
       yield ConsolidatedPageLoadApi.getConsolidatedPageLoadDataView({
@@ -1114,7 +1139,7 @@ export function* updateWidgetNameSaga(
           state.entities.canvasWidgets.hasOwnProperty(widget.parentId)
         ) {
           // If the parent exists assign it to a variable
-          const parent = state.entities.canvasWidgets[widget.parentId];
+            const parent = state.entities.canvasWidgets[widget.parentId];
 
           // Check if this parent is a TABS_WIDGET
           if (parent.type === WidgetTypes.TABS_WIDGET) {
@@ -1269,12 +1294,6 @@ export function* fetchPageDSLSaga(
       // Wait for the Widget config to be loaded before we can migrate the DSL
       yield call(waitForWidgetConfigBuild);
       // DSL migrations will now happen on the server
-      // So, it may not be necessary to run dslTransformer on the pageDSL
-      // or to run the DSL by the extractCurrentDSL function
-      // Another caveat to note is that we have conversions happening
-      // between Auto Layout and Fixed layout systems, this means that
-      // particularly for these two layout systems the dslTransformer may be necessary
-      // unless we're no longer running any conversions
       const { dsl, layoutId } = yield extractCurrentDSL({
         dslTransformer,
         response: fetchPageResponse,
@@ -1512,13 +1531,22 @@ export function* setPreviewModeInitSaga(action: ReduxAction<boolean>) {
   }
 }
 
-export function* setupPageSaga(action: ReduxAction<SetupPageActionPayload>) {
+export function* setupPageSaga(action: ReduxAction<SetupPageActionPayload>): Generator {
   try {
     const {
       id: pageId,
       isFirstLoad = false,
       pageWithMigratedDsl,
     } = action.payload;
+
+    // USER PAGE ACCESS INTEGRATION (view mode)
+    const accessState = (yield select(
+    selectUserPageAccessState,
+  )) as ReturnType<typeof selectUserPageAccessState>;
+
+  if (!accessState.loaded && !accessState.loading) {
+    yield put(fetchUserPageAccess());
+  }
 
     /*
       Added the first line for isPageSwitching redux state to be true when page is being fetched to fix scroll position issue.
@@ -1540,9 +1568,19 @@ export function* setupPageSaga(action: ReduxAction<SetupPageActionPayload>) {
 
 export function* setupPublishedPageSaga(
   action: ReduxAction<SetupPublishedPageActionPayload>,
-) {
+): Generator {
   try {
+    console.log("setupPublishedPageSaga called");
     const { bustCache, pageId, pageWithMigratedDsl } = action.payload;
+
+    // USER PAGE ACCESS INTEGRATION (view mode)
+    const accessState = (yield select(
+    selectUserPageAccessState,
+  )) as ReturnType<typeof selectUserPageAccessState>;
+
+  if (!accessState.loaded && !accessState.loading) {
+    yield put(fetchUserPageAccess());
+  }
 
     /*
       Added the first line for isPageSwitching redux state to be true when page is being fetched to fix scroll position issue.

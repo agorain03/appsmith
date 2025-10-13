@@ -17,6 +17,7 @@ import type { PluginDataState } from "reducers/entityReducers/pluginsReducer";
 import type { AuthState } from "reducers/uiReducers/authReducer";
 import type { WorkspaceReduxState } from "ee/reducers/uiReducers/workspaceReducer";
 import type { UsersReduxState } from "reducers/uiReducers/usersReducer";
+import type { UserPageAccessState } from "reducers/uiReducers/userPageAccessReducer";
 import type { ThemeState } from "reducers/uiReducers/themeReducer";
 import type { WidgetDragResizeState } from "reducers/uiReducers/dragResizeReducer";
 import type { MetaState } from "reducers/entityReducers/metaReducer";
@@ -147,6 +148,7 @@ export interface AppState {
     activeField: ActiveField;
     ide: IDEState;
     pluginActionEditor: PluginActionEditorState;
+    userPageAccess: UserPageAccessState;
   };
   entities: {
     canvasWidgetsStructure: CanvasWidgetStructure;
