@@ -10,6 +10,7 @@ import com.appsmith.server.newactions.base.NewActionService;
 import com.appsmith.server.newpages.base.NewPageService;
 import com.appsmith.server.plugins.base.PluginService;
 import com.appsmith.server.services.AnalyticsService;
+import com.appsmith.server.services.ApiExecutionAccessService;
 import com.appsmith.server.services.AuthenticationValidator;
 import com.appsmith.server.services.ConfigService;
 import com.appsmith.server.services.DatasourceContextService;
@@ -44,7 +45,8 @@ public class ActionExecutionSolutionImpl extends ActionExecutionSolutionCEImpl i
             OrganizationService organizationService,
             CommonConfig commonConfig,
             ActionExecutionSolutionHelper actionExecutionSolutionHelper,
-            FeatureFlagService featureFlagService) {
+            FeatureFlagService featureFlagService,
+            ApiExecutionAccessService apiExecutionAccessService) {
         super(
                 newActionService,
                 actionPermission,
@@ -66,6 +68,7 @@ public class ActionExecutionSolutionImpl extends ActionExecutionSolutionCEImpl i
                 organizationService,
                 commonConfig,
                 actionExecutionSolutionHelper,
-                featureFlagService);
+                featureFlagService,
+                apiExecutionAccessService);
     }
 }

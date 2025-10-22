@@ -22,6 +22,7 @@ interface Props {
   isChangePermitted: boolean;
   bodyUIComponent: React.ReactNode;
   paginationUiComponent: React.ReactNode;
+  apiAccessUiComponent?: React.ReactNode;
   dataTestId?: string;
 }
 
@@ -32,6 +33,7 @@ const CommonEditorForm = (props: Props) => {
     formName,
     isChangePermitted,
     paginationUiComponent,
+    apiAccessUiComponent,
   } = props;
   const hintMessages = action.messages || [];
   const theme = EditorTheme.LIGHT;
@@ -128,6 +130,9 @@ const CommonEditorForm = (props: Props) => {
       </Styled.TabPanel>
       <Styled.TabPanel value={API_EDITOR_TABS.AUTHENTICATION}>
         <ApiAuthentication formName={formName} />
+      </Styled.TabPanel>
+      <Styled.TabPanel value={API_EDITOR_TABS.USER_ACCESS}>
+        {apiAccessUiComponent}
       </Styled.TabPanel>
     </Styled.Tabs>
   );

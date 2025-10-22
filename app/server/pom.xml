@@ -29,8 +29,12 @@
         <deploy.disabled>true</deploy.disabled>
         <jackson-bom.version>2.17.0</jackson-bom.version>
         <jackson.version>2.17.0</jackson.version>
+
+        <!-- Force Java version -->
         <java.version>17</java.version>
+
         <javadoc.disabled>true</javadoc.disabled>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <mockito.version>4.4.0</mockito.version>
@@ -41,17 +45,20 @@
         <project.groupId>com.appsmith</project.groupId>
         <project.version>1.0-SNAPSHOT</project.version>
         <reactor-test.version>3.5.1</reactor-test.version>
+
         <!-- By default skip the dockerization step. Only activate if necessary -->
         <skipDockerBuild>true</skipDockerBuild>
         <skipITs>${skipTests}</skipITs>
         <skipTests>false</skipTests>
         <skipUTs>${skipTests}</skipUTs>
+
         <!-- We're forcing this version temporarily to fix CVE-2022-1471-->
         <snakeyaml.version>2.0</snakeyaml.version>
         <source.disabled>true</source.disabled>
         <spotless.version>2.36.0</spotless.version>
         <testcontainers.version>1.20.1</testcontainers.version>
     </properties>
+
     <build>
         <resources>
             <resource>

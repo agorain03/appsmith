@@ -8,12 +8,14 @@ import com.appsmith.server.jslibs.base.CustomJSLibService;
 import com.appsmith.server.newactions.base.NewActionService;
 import com.appsmith.server.newpages.base.NewPageService;
 import com.appsmith.server.plugins.base.PluginService;
+import com.appsmith.server.repositories.ApplicationRepository;
 import com.appsmith.server.repositories.CacheableRepositoryHelper;
 import com.appsmith.server.services.ce_compatible.ConsolidatedAPIServiceCECompatibleImpl;
 import com.appsmith.server.themes.base.ThemeService;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Slf4j
 @Service
@@ -37,7 +39,9 @@ public class ConsolidatedAPIServiceImpl extends ConsolidatedAPIServiceCECompatib
             MockDataService mockDataService,
             ObservationRegistry observationRegistry,
             CacheableRepositoryHelper cacheableRepositoryHelper,
-            ObservationHelper observationHelper) {
+            ObservationHelper observationHelper,
+            WebClient.Builder webClientBuilder,
+            ApplicationRepository applicationRepository) {
         super(
                 sessionUserService,
                 userService,
@@ -56,6 +60,8 @@ public class ConsolidatedAPIServiceImpl extends ConsolidatedAPIServiceCECompatib
                 mockDataService,
                 observationRegistry,
                 cacheableRepositoryHelper,
-                observationHelper);
+                observationHelper,
+                webClientBuilder,
+                applicationRepository);
     }
 }

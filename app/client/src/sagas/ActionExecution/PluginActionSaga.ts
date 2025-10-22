@@ -1414,6 +1414,10 @@ function* executePluginActionSaga(
 
   try {
     response = yield ActionAPI.executeAction(formData, timeout);
+    if(response.responseMeta?.error?.code === "AE-ACL-4003"){
+      console.log("THROWING CUSTOM ERROR")
+      throw new PluginActionExecutionError("Unauthorized access - 401", true);
+    }
 
     const isError = isErrorResponse(response);
 
@@ -1476,6 +1480,12 @@ function* executePluginActionSaga(
   } catch (e) {
     // TODO: Fix this the next time the file is edited
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    console.log("ERROR IN ACTION EXECTION CUSTOM HANDLER", (e as any).message, e);
+
+    if((e as any).message === "Unauthorized access - 401"){
+      throw new PluginActionExecutionError("Unauthorized API access", true);
+    }
+
     if ("clientDefinedError" in (e as any)) {
       // Case: error from client side validation
       if (filePickerInstrumentation.numberOfFiles > 0) {

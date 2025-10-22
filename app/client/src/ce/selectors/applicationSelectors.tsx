@@ -91,6 +91,11 @@ export const getIsChangingViewAccess = createSelector(
     applications.isChangingViewAccess,
 );
 
+export const getIsUnauthPage = createSelector(
+  getApplicationsState,
+  (applications: ApplicationsReduxState): boolean => applications.isUnauthPage,
+)
+
 export const getIsCreatingApplication = createSelector(
   getApplicationsState,
   (applications: ApplicationsReduxState): creatingApplicationMap =>

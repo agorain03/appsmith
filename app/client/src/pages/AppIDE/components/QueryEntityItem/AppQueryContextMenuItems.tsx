@@ -16,6 +16,8 @@ import {
 } from "../AppPluginActionEditor/components/ContextMenuItems";
 import { MenuSeparator } from "@appsmith/ads";
 import { InspectStateMenuItem } from "components/editorComponents/Debugger/StateInspector/CTAs";
+import { useSelector } from "react-redux";
+import { getApplicationsState } from "ce/selectors/applicationSelectors";
 
 export interface Props {
   action: Action;
@@ -24,6 +26,14 @@ export interface Props {
 export function AppQueryContextMenuItems(props: Props) {
   const { action } = props;
   const actionPermissions = action.userPermissions || [];
+  const actionAppId = action.applicationId;
+  const currentAppState = useSelector(getApplicationsState)
+  const currentAppId = currentAppState?.currentApplication?.id;
+  const isModuleAction = actionAppId !== currentAppId;
+
+  if (isModuleAction) {
+    return null;
+  }
 
   const isFeatureEnabled = useFeatureFlag(FEATURE_FLAG.license_gac_enabled);
 

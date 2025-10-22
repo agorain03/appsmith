@@ -11,6 +11,7 @@ import { FEATURE_FLAG } from "ee/entities/FeatureFlag";
 import { getHasManageActionPermission } from "ee/utils/BusinessFeatures/permissionPageHelpers";
 import { EditorTheme } from "components/editorComponents/CodeEditor/EditorConfig";
 import useGetFormActionValues from "../CommonEditorForm/hooks/useGetFormActionValues";
+import UserAccessTab from "../ApiEditor/UserAccessTab";
 
 function GraphQLEditorForm() {
   const { action } = usePluginActionContext();
@@ -39,6 +40,12 @@ function GraphQLEditorForm() {
           paginationType={action.actionConfiguration.paginationType}
           query={actionConfigurationBody}
           theme={theme}
+        />
+      }
+      apiAccessUiComponent={
+        <UserAccessTab
+          isChangePermitted={isChangePermitted}
+          actionId={action.id}
         />
       }
     />

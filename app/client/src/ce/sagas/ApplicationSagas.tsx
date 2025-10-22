@@ -582,6 +582,7 @@ export function* createApplicationSaga(
     icon: IconNames;
     color: AppColorCode;
     workspaceId: string;
+    isModule: Boolean,
     // TODO: Fix this the next time the file is edited
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolve: any;
@@ -590,7 +591,7 @@ export function* createApplicationSaga(
     reject: any;
   }>,
 ) {
-  const { applicationName, color, icon, reject, workspaceId } = action.payload;
+  const { applicationName, color, icon, reject, workspaceId, isModule } = action.payload;
 
   try {
     const applications: Workspace[] = yield select(getApplicationsOfWorkspace);
@@ -618,6 +619,7 @@ export function* createApplicationSaga(
         color: color,
         workspaceId,
         layoutSystemType: LayoutSystemTypes.FIXED, // Note: This may be provided as an action payload in the future
+        isModule: isModule
       };
 
       const response: CreateApplicationResponse = yield call(

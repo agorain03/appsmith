@@ -1,0 +1,23 @@
+diff --git a/.gitignore b/.gitignore
+index be4c06329c..8a0ea7a2b6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,6 +1,6 @@
+ .DS_Store
+ *.iml
+-.env
++
+ 
+ stacks
+ /deploy/docker/fs/opt/appsmith/info.json
+diff --git a/app/server/.gitignore b/app/server/.gitignore
+index 51fff55542..b7bbcaa4e0 100644
+--- a/app/server/.gitignore
++++ b/app/server/.gitignore
+@@ -12,6 +12,5 @@ node_modules
+ **/.project
+ **/.factorypath
+ container-volumes
+-*.env*
+ dependency-reduced-pom.xml
+ appsmith-server/failedServerTests.txt

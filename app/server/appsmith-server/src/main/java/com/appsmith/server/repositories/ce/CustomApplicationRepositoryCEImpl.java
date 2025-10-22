@@ -49,6 +49,13 @@ public class CustomApplicationRepositoryCEImpl extends BaseAppsmithRepositoryImp
     }
 
     @Override
+    public Flux<Application> findByIsModuleTrue() {
+        return queryBuilder()
+                .criteria(Bridge.isTrue(Application.Fields.isModule))
+                .all();
+    }
+
+    @Override
     public Flux<Application> findByWorkspaceId(String workspaceId, AclPermission permission) {
         return queryBuilder()
                 .criteria(Bridge.equal(Application.Fields.workspaceId, workspaceId))

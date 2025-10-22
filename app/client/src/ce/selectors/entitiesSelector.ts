@@ -701,7 +701,7 @@ export const getCurrentActions = createSelector(
   (pageId, actions): ActionData[] => {
     if (!pageId) return [];
 
-    return actions.filter((a) => a.config.pageId === pageId);
+    return actions.filter((a) => a.config.pageId === pageId || a.config.fromModule === true);
   },
 );
 
@@ -730,7 +730,7 @@ export const getCurrentJSCollections = createSelector(
   (pageId, actions) => {
     if (!pageId) return [];
 
-    return actions.filter((a) => a.config.pageId === pageId);
+    return actions.filter((a) => a.config.pageId === pageId || a.config.fromModule === true);
   },
 );
 
@@ -1709,6 +1709,7 @@ export const getQuerySegmentItems = createSelector(
   selectDatasourceIdToNameMap,
   (actions, plugins, datasourceIdToNameMap) => {
     const pluginGroups = keyBy(plugins, "id");
+    console.log("INSIDE GETQUERYSEGMENTITEMS", actions, plugins);
     const items: EntityItem[] = actions
       .filter((action) => {
         // We don't want to show system generated actions in the query explorer
@@ -1737,7 +1738,7 @@ export const getQuerySegmentItems = createSelector(
 
         return {
           icon: ActionUrlIcon(iconUrl, "16", "16"),
-          title: action.config.name,
+          title: action.config.fromModule === true ? "[Module API] " + action.config.name : action.config.name,
           key: action.config.baseId,
           type: action.config.pluginType,
           group,
@@ -1753,7 +1754,7 @@ export const getJSSegmentItems = createSelector(
   (jsActions) => {
     const items: EntityItem[] = jsActions.map((js) => ({
       icon: JsFileIconV2(),
-      title: js.config.name,
+      title: js.config.fromModule ? "[Module JS] " + js.config.name : js.config.name,
       key: js.config.baseId,
       type: PluginType.JS,
       userPermissions: js.config.userPermissions,

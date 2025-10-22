@@ -76,6 +76,17 @@ const AppViewerBodyContainer = styled.div<{
   background: ${({ backgroundColor }) => backgroundColor};
 `;
 
+// New styled component for the unauthorized message
+const CenteredMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--ads-v2-color-fg);
+  font-size: 18px;
+`;
+
 export type AppViewerProps = RouteComponentProps<BuilderRouteParams>;
 
 type Props = AppViewerProps & RouteComponentProps<AppViewerRouteParams>;

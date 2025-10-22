@@ -44,6 +44,16 @@ import java.util.Set;
 @FieldNameConstants
 public class ActionCE_DTO implements Identifiable, Executable {
 
+    private Boolean fromModule;
+
+    public Boolean getFromModule() {
+        return fromModule;
+    }
+
+    public void setFromModule(Boolean fromModule) {
+        this.fromModule = fromModule;
+    }
+
     @Transient
     @JsonView({Views.Public.class, FromRequest.class})
     private String id;

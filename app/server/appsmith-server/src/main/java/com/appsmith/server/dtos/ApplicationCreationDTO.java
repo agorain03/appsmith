@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public record ApplicationCreationDTO(
         @NotBlank @Size(max = 99) String workspaceId,
+        Boolean isModule,
         @NotBlank @Size(max = 99) String name,
         @IconName String icon,
         @Pattern(regexp = "#[A-F0-9]{6}") String color,
@@ -22,6 +23,7 @@ public record ApplicationCreationDTO(
         application.setName(name.trim());
         application.setIcon(StringUtils.isBlank(icon) ? null : icon.trim());
         application.setColor(color);
+        application.setIsModule(isModule);
 
         final ApplicationDetail applicationDetail = new ApplicationDetail();
         application.setApplicationDetail(applicationDetail);

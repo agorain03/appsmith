@@ -2,6 +2,9 @@ package com.appsmith.util;
 
 import com.appsmith.external.exceptions.pluginExceptions.AppsmithPluginError;
 import com.appsmith.external.exceptions.pluginExceptions.AppsmithPluginException;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.resolver.AddressResolver;
 import io.netty.resolver.AddressResolverGroup;
 import io.netty.resolver.InetNameResolver;
@@ -163,6 +166,16 @@ public class WebClientUtils {
     private static HttpClient makeSafeHttpClient(HttpClient httpClient) {
         if (shouldUseSystemProxy()) {
             httpClient = httpClient.proxyWithSystemProperties();
+        }
+
+        // doing this to avoid issues with self-signed certificates
+        try {
+            SslContext sslContext = SslContextBuilder.forClient()
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .build();
+            httpClient = httpClient.secure(sslContextSpec -> sslContextSpec.sslContext(sslContext));
+        } catch (Exception e) {
+            log.warn("Failed to configure insecure SSL context", e);
         }
 
         return httpClient.resolver(ResolverGroup.INSTANCE);

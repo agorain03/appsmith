@@ -59,7 +59,7 @@ export const EntityItem = (props: EntityItemProps) => {
 
   // Do not show right control if the visibility is hover and the item is in edit mode
   const rightControl = useMemo(() => {
-    if (props.rightControlVisibility === "hover" && inEditMode) {
+    if (props.rightControlVisibility === "hover" && inEditMode || props.isModuleEntity) {
       return null;
     }
 

@@ -36,6 +36,14 @@ public enum AppsmithError {
             "Plugin not installed",
             ErrorType.INTERNAL_ERROR,
             null),
+    API_EXECUTION_UNAUTHORIZED(
+            400,
+            AppsmithErrorCode.UNAUTH_API.getCode(),
+            "User is not authorized to execute this API",
+            AppsmithErrorAction.DEFAULT,
+            "Auth API Error",
+            ErrorType.INTERNAL_ERROR,
+            null),
     PLUGIN_ID_NOT_GIVEN(
             400,
             AppsmithErrorCode.PLUGIN_ID_NOT_GIVEN.getCode(),

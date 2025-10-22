@@ -70,6 +70,8 @@ export default class AppViewerEngine extends AppEngine {
       rootSpan,
     );
 
+    // The `call` effect tells the saga to execute a function.
+    // The generator will PAUSE here until super.setupEngine is done.
     yield call(super.setupEngine.bind(this), payload, rootSpan);
 
     endSpan(viewerSetupSpan);

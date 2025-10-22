@@ -16,6 +16,8 @@ public interface CustomApplicationRepositoryCE extends AppsmithRepository<Applic
 
     Mono<Application> findByIdAndWorkspaceId(String id, String workspaceId, AclPermission permission);
 
+    Flux<Application> findByIsModuleTrue();
+
     Mono<Application> findByName(String name, AclPermission permission);
 
     Flux<Application> findByWorkspaceId(String workspaceId, AclPermission permission);

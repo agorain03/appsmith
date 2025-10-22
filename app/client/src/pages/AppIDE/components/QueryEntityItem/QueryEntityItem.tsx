@@ -26,6 +26,7 @@ import { PluginType } from "entities/Plugin";
 import { useParentEntityInfo } from "ee/IDE/hooks/useParentEntityInfo";
 import { AppQueryContextMenuItems } from "./AppQueryContextMenuItems";
 import type { EntityItem as EntityItemProps } from "ee/IDE/Interfaces/EntityItem";
+import { getApplicationsState } from "ee/selectors/applicationSelectors";
 
 export const QueryEntityItem = ({ item }: { item: EntityItemProps }) => {
   const action = useSelector((state: DefaultRootState) =>
@@ -43,6 +44,12 @@ export const QueryEntityItem = ({ item }: { item: EntityItemProps }) => {
 
   const { editingEntity, enterEditMode, exitEditMode, updatingEntity } =
     useNameEditorState();
+
+  const applicationsState = useSelector(getApplicationsState);
+  const currentAppId = applicationsState?.currentApplication?.id;
+  const actionAppId = action.applicationId;
+  const isModuleAction = actionAppId !== currentAppId;
+
 
   const validateName = useValidateEntityName({
     entityName: item.title,
@@ -130,6 +137,7 @@ export const QueryEntityItem = ({ item }: { item: EntityItemProps }) => {
       rightControlVisibility="hover"
       startIcon={icon}
       title={item.title}
+      isModuleEntity={isModuleAction}
     />
   );
 };

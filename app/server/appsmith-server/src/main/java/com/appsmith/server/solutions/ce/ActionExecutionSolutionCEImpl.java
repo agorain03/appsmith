@@ -43,6 +43,7 @@ import com.appsmith.server.newactions.base.NewActionService;
 import com.appsmith.server.newpages.base.NewPageService;
 import com.appsmith.server.plugins.base.PluginService;
 import com.appsmith.server.services.AnalyticsService;
+import com.appsmith.server.services.ApiExecutionAccessService;
 import com.appsmith.server.services.AuthenticationValidator;
 import com.appsmith.server.services.ConfigService;
 import com.appsmith.server.services.DatasourceContextService;
@@ -129,6 +130,7 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
     private final ActionExecutionSolutionHelper actionExecutionSolutionHelper;
     private final CommonConfig commonConfig;
     private final FeatureFlagService featureFlagService;
+    private final ApiExecutionAccessService apiExecutionAccessService;
 
     static final String PARAM_KEY_REGEX = "^k\\d+$";
     static final String BLOB_KEY_REGEX =
@@ -158,7 +160,8 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
             OrganizationService organizationService,
             CommonConfig commonConfig,
             ActionExecutionSolutionHelper actionExecutionSolutionHelper,
-            FeatureFlagService featureFlagService) {
+            FeatureFlagService featureFlagService,
+            ApiExecutionAccessService apiExecutionAccessService) {
         this.newActionService = newActionService;
         this.actionPermission = actionPermission;
         this.observationRegistry = observationRegistry;
@@ -180,6 +183,7 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
         this.commonConfig = commonConfig;
         this.actionExecutionSolutionHelper = actionExecutionSolutionHelper;
         this.featureFlagService = featureFlagService;
+        this.apiExecutionAccessService = apiExecutionAccessService;
 
         this.patternList.add(Pattern.compile(PARAM_KEY_REGEX));
         this.patternList.add(Pattern.compile(BLOB_KEY_REGEX));
@@ -201,12 +205,47 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
      */
     protected Mono<ActionExecutionResult> populateAndExecuteAction(
             ExecuteActionDTO executeActionDTO, ExecuteActionMetaDTO executeActionMetaDTO) {
+        log.info("Populating and executing action for action id: {}, executeActionMetaDTO: {}");
         AclPermission executePermission = getPermission(executeActionMetaDTO, actionPermission.getExecutePermission());
         Mono<NewAction> newActionMono = newActionService
                 .findById(executeActionDTO.getActionId(), executePermission)
                 .cache();
 
-        Mono<ExecuteActionDTO> populatedExecuteActionDTOMono = newActionMono
+        Mono<NewAction> authorizedNewActionMono = newActionMono
+                .flatMap(newAction -> {
+                    log.info("INSIDE API ACCESS CHECK: actionId={}", newAction.getId());
+
+                    if (!isApiPlugin(newAction)) {
+                        return Mono.just(newAction);
+                    }
+                    log.info(
+                            "CURRENT USER FETCH STARTED for actionId={} and isApi={}",
+                            newAction.getId(),
+                            !isApiPlugin(newAction));
+
+                    return sessionUserService
+                            .getCurrentUser()
+                            .switchIfEmpty(Mono.error(
+                                    new AppsmithException(AppsmithError.API_EXECUTION_UNAUTHORIZED, "User not found")))
+                            .flatMap(user -> apiExecutionAccessService
+                                    .canUserExecute(newAction.getId(), user.getEmail())
+                                    .flatMap(can -> {
+                                        log.info(
+                                                "INSIDE API ACCESS CAN: actionId={} allowed={} for user={}",
+                                                newAction.getId(),
+                                                can,
+                                                user.getEmail());
+                                        if (Boolean.TRUE.equals(can)) {
+                                            return Mono.just(newAction);
+                                        }
+                                        return Mono.error(new AppsmithException(
+                                                AppsmithError.API_EXECUTION_UNAUTHORIZED,
+                                                "API ID: " + newAction.getId()));
+                                    }));
+                })
+                .cache();
+
+        Mono<ExecuteActionDTO> populatedExecuteActionDTOMono = authorizedNewActionMono
                 .flatMap(newAction -> populateExecuteActionDTO(executeActionDTO, newAction))
                 .name(POPULATED_EXECUTE_ACTION_DTO_MONO)
                 .tap(Micrometer.observation(observationRegistry));
@@ -224,6 +263,22 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
                 })
                 .name(POPULATE_AND_EXECUTE_ACTION)
                 .tap(Micrometer.observation(observationRegistry));
+    }
+
+    private boolean isApiPlugin(NewAction newAction) {
+        if (newAction == null) {
+            return false;
+        }
+        // ActionDTO candidate = newAction.getUnpublishedAction();
+        // if (candidate == null) {
+        //     candidate = newAction.getPublishedAction();
+        // }
+        log.info(
+                "Checking if action with id={} is an API action, isApiPlugin={}",
+                newAction.getId(),
+                newAction.getPluginType());
+        log.info("isApiPluginBool={}", newAction.getPluginType() == PluginType.API);
+        return newAction.getPluginType() == PluginType.API;
     }
 
     /**
@@ -293,6 +348,7 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
     @Override
     public Mono<ActionExecutionResult> executeAction(
             Flux<Part> partFlux, String environmentId, HttpHeaders httpHeaders, Boolean operateWithoutPermission) {
+        log.info("EXECUTE 1");
         ExecuteActionMetaDTO executeActionMetaDTO = ExecuteActionMetaDTO.builder()
                 .headers(httpHeaders)
                 .operateWithoutPermission(operateWithoutPermission)
@@ -342,6 +398,8 @@ public class ActionExecutionSolutionCEImpl implements ActionExecutionSolutionCE 
     @Override
     public Mono<ActionExecutionResult> executeAction(
             ExecuteActionDTO executeActionDTO, ExecuteActionMetaDTO executeActionMetaDTO) {
+
+        log.info("EXECUTE 2");
 
         // Earlier, here we were replacing null with quotes for param values.
 

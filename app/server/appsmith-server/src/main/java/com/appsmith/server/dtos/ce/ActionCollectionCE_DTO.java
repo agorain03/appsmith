@@ -33,6 +33,16 @@ import java.util.Set;
 @FieldNameConstants
 public class ActionCollectionCE_DTO {
 
+    private Boolean fromModule;
+
+    public Boolean getFromModule() {
+        return fromModule;
+    }
+
+    public void setFromModule(Boolean fromModule) {
+        this.fromModule = fromModule;
+    }
+
     @Transient
     @JsonView(Views.Public.class)
     private String id;

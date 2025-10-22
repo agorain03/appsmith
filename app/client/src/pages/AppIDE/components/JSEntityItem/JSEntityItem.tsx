@@ -20,6 +20,7 @@ import { jsCollectionIdURL } from "ee/RouteBuilder";
 import { JsFileIconV2 } from "pages/Editor/Explorer/ExplorerIcons";
 import { AppJSContextMenuItems } from "./AppJSContextMenuItems";
 import type { EntityItem as EntityItemProps } from "ee/IDE/Interfaces/EntityItem";
+import { getApplicationsState } from "ee/selectors/applicationSelectors";
 import clsx from "clsx";
 
 export const JSEntityItem = ({ item }: { item: EntityItemProps }) => {
@@ -69,6 +70,12 @@ export const JSEntityItem = ({ item }: { item: EntityItemProps }) => {
     baseCollectionId: jsAction.baseId,
     params: {},
   });
+
+  const applicationsState = useSelector(getApplicationsState);
+  const currentAppId = applicationsState?.currentApplication?.id;
+  const actionAppId = jsAction.applicationId;
+  const isModuleActionCollection = actionAppId !== currentAppId;
+
 
   const navigateToJSCollection = useCallback(() => {
     if (jsAction.baseId) {
@@ -120,6 +127,7 @@ export const JSEntityItem = ({ item }: { item: EntityItemProps }) => {
       rightControlVisibility="hover"
       startIcon={JsFileIconV2(16, 16)}
       title={item.title}
+      isModuleEntity={isModuleActionCollection}
     />
   );
 };

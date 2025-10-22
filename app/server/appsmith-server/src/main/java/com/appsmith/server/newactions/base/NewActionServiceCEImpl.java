@@ -76,6 +76,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.appsmith.external.constants.spans.ActionSpan.GET_ACTION_REPOSITORY_CALL;
+import static com.appsmith.external.constants.spans.ce.ActionSpanCE.GET_ACTION_REPOSITORY_CALL;
 import static com.appsmith.external.constants.spans.ce.ActionSpanCE.VIEW_MODE_FETCH_ACTIONS_FROM_DB;
 import static com.appsmith.external.constants.spans.ce.ActionSpanCE.VIEW_MODE_FETCH_PLUGIN_FROM_DB;
 import static com.appsmith.external.constants.spans.ce.ActionSpanCE.VIEW_MODE_SET_PLUGIN_ID_AND_TYPE_ACTION;
@@ -236,6 +237,41 @@ public class NewActionServiceCEImpl extends BaseService<NewActionRepository, New
         Set<Policy> documentPolicies =
                 policyGenerator.getAllChildPolicies(page.getPolicies(), NewPage.class, NewAction.class);
         action.setPolicies(documentPolicies);
+    }
+
+    @Override
+    public Flux<ActionDTO> getUnpublishedActionsForApplication(String applicationId) {
+
+        if (!StringUtils.hasLength(applicationId)) {
+            return Flux.error(new AppsmithException(AppsmithError.INVALID_PARAMETER, FieldName.APPLICATION_ID));
+        }
+
+        // Sort by creation time for deterministic ordering in the editor (same as getUnpublishedActionsFromRepo).
+        Sort sort = Sort.by(FieldName.CREATED_AT);
+
+        return repository
+                // Fetch all NewAction documents for this application (unpublished viewMode = false).
+                .findByApplicationId(applicationId, actionPermission.getReadPermission(), sort)
+                // Filter out those that are logically deleted/archived in edit mode.
+                .filter(newAction -> {
+                    ActionDTO unpublished = newAction.getUnpublishedAction();
+                    log.info("This is value of PluginType: {} and Bool: {} +++++++++++++++++++++", newAction.getPluginType(), Boolean.TRUE.equals(newAction.getPluginType() == PluginType.JS));
+                    return unpublished != null
+                            && unpublished.getDeletedAt() == null
+                            && !Boolean.TRUE.equals(newAction.isDeleted())
+                            && !Boolean.TRUE.equals(newAction.getPluginType() == PluginType.JS);
+                })
+                // Sanitize (adds missing pluginType/pluginId if absent, etc.)
+                .flatMap(this::sanitizeAction)
+                // Collect first so we can batch enrichment of plugin details.
+                .collectList()
+                // Add missing plugin details for any action missing pluginType/pluginId.
+                .flatMapMany(this::addMissingPluginDetailsIntoAllActions)
+                // For each NewAction, set transient fields then map to ActionDTO (unpublished variant).
+                .flatMap(this::setTransientFieldsInUnpublishedAction)
+                // Tag + span instrumentation similar to other fetches.
+                .name(GET_ACTION_REPOSITORY_CALL)
+                .tap(Micrometer.observation(observationRegistry));
     }
 
     /**

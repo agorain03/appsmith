@@ -9,6 +9,7 @@ import com.appsmith.server.newactions.base.NewActionService;
 import com.appsmith.server.newpages.base.NewPageService;
 import com.appsmith.server.plugins.base.PluginService;
 import com.appsmith.server.repositories.CacheableRepositoryHelper;
+import com.appsmith.server.repositories.ApplicationRepository;
 import com.appsmith.server.services.ApplicationPageService;
 import com.appsmith.server.services.MockDataService;
 import com.appsmith.server.services.OrganizationService;
@@ -19,6 +20,7 @@ import com.appsmith.server.services.UserService;
 import com.appsmith.server.services.ce.ConsolidatedAPIServiceCEImpl;
 import com.appsmith.server.themes.base.ThemeService;
 import io.micrometer.observation.ObservationRegistry;
+import org.springframework.web.reactive.function.client.WebClient;
 
 public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServiceCEImpl
         implements ConsolidatedAPIServiceCECompatible {
@@ -40,7 +42,9 @@ public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServi
             MockDataService mockDataService,
             ObservationRegistry observationRegistry,
             CacheableRepositoryHelper cacheableRepositoryHelper,
-            ObservationHelper observationHelper) {
+            ObservationHelper observationHelper,
+            WebClient.Builder webClientBuilder,
+            ApplicationRepository applicationRepository) {
         super(
                 sessionUserService,
                 userService,
@@ -58,7 +62,9 @@ public class ConsolidatedAPIServiceCECompatibleImpl extends ConsolidatedAPIServi
                 datasourceService,
                 mockDataService,
                 observationRegistry,
+                applicationRepository,
                 cacheableRepositoryHelper,
-                observationHelper);
+                observationHelper,
+                webClientBuilder);
     }
 }

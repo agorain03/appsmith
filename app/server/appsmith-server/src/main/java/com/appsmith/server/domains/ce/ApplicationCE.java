@@ -59,6 +59,9 @@ public class ApplicationCE extends BaseDomain implements ArtifactCE {
     @JsonView({Views.Public.class, Git.class})
     List<ApplicationPage> pages;
 
+    @JsonView({Views.Public.class, Git.class})
+    Boolean isModule;
+
     @JsonView(Views.Internal.class)
     List<ApplicationPage> publishedPages;
 
@@ -345,6 +348,10 @@ public class ApplicationCE extends BaseDomain implements ArtifactCE {
 
     public Application.AppLayout getAppLayout() {
         return Boolean.TRUE.equals(viewMode) ? publishedAppLayout : unpublishedAppLayout;
+    }
+    
+    public String getAppName() {
+        return this.name;
     }
 
     public void setAppLayout(Application.AppLayout appLayout) {

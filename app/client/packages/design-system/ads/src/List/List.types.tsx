@@ -42,6 +42,7 @@ export interface ListItemProps {
   dataTestId?: string;
   /** Whether to show the unsaved changes indicator */
   showUnsavedChanges?: boolean;
+  isModuleEntity?: boolean;
 }
 
 export interface ListProps {

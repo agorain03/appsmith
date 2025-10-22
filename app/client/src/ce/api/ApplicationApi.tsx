@@ -15,6 +15,8 @@ import type {
   LayoutSystemTypes,
 } from "layoutSystems/types";
 import type { AppLayoutConfig } from "reducers/entityReducers/pageListReducer";
+import { isModuleBlock } from "typescript";
+import { is } from "date-fns/locale";
 
 export interface PublishApplicationRequest {
   applicationId: string;
@@ -65,6 +67,7 @@ export interface ApplicationResponsePayload {
   applicationVersion: ApplicationVersion;
   isPublic?: boolean;
   connectedWorkflowId?: string;
+  isModule?: boolean;
 }
 
 export interface FetchApplicationPayload {
@@ -95,6 +98,7 @@ export interface CreateApplicationRequest {
   icon?: IconNames;
   layoutSystemType: LayoutSystemTypes;
   showNavbar?: boolean;
+  isModule?: Boolean;
 }
 
 export interface SetDefaultPageRequest {
@@ -356,6 +360,7 @@ export class ApplicationApi extends Api {
       icon: request.icon,
       positioningType: request.layoutSystemType,
       showNavbar: request.showNavbar ?? null,
+      isModule: request.isModule,
     });
   }
 

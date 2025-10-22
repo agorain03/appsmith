@@ -17,6 +17,16 @@ import static com.appsmith.external.constants.ActionConstants.DEFAULT_ACTION_EXE
 @NoArgsConstructor
 @ToString
 public class ActionViewCE_DTO {
+    private Boolean fromModule;
+
+    public Boolean getFromModule() {
+        return fromModule;
+    }
+
+    public void setFromModule(Boolean fromModule) {
+        this.fromModule = fromModule;
+    }
+    
     @JsonView(Views.Public.class)
     String id;
 

@@ -246,7 +246,7 @@ export function* getInitResponses({
       ReduxActionTypes.START_CONSOLIDATED_PAGE_LOAD,
       shouldInitialiseUserDetails,
     );
-
+    console.log("HERE IN INIT SAGA ++++++++++++++++")
     const rootSpan = startRootSpan("fetch-consolidated-api");
     const initConsolidatedApiResponse: ApiResponse<InitConsolidatedApi> =
       yield mode === APP_MODE.EDIT

@@ -16,6 +16,7 @@ export interface JSCollection {
   workspaceId: string;
   name: string;
   pageId: string;
+  fromModule?: boolean;
   pluginId: string;
   pluginType: PluginType.JS;
   actions: Array<JSAction>;

@@ -139,6 +139,7 @@ export interface BaseAction {
   workspaceId: string;
   applicationId: string;
   pageId: string;
+  fromModule: boolean | undefined;
   collectionId?: string;
   pluginId: string;
   runBehaviour: ActionRunBehaviourType;

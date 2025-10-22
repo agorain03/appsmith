@@ -223,6 +223,7 @@ function* changeApiSaga(
     action?: Action;
   }>,
 ) {
+  console.log("INSIDE CHANGE API SAGA")
   const { id, isSaas } = actionPayload.payload;
   let { action } = actionPayload.payload;
 

@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import {
   IMPORT_BTN_LABEL,
   NEW_APP,
+  NEW_MODULE,
   NEW_APP_FROM_TEMPLATE,
   WORKSPACE_ACTION_BUTTON,
   createMessage,
@@ -27,7 +28,7 @@ export interface WorkspaceActionProps {
   isMobile: boolean;
   enableImportExport: boolean;
   workspaceId: string;
-  onCreateNewApplication: (workspaceId: string) => void;
+  onCreateNewApplication: (workspaceId: string, isModule: Boolean) => void;
   onStartFromTemplate: (workspaceId: string) => void;
   setSelectedWorkspaceIdForImportApplication: (workspaceId?: string) => void;
 }
@@ -88,7 +89,7 @@ function WorkspaceAction({
         <MenuItem
           data-testid="t--workspace-action-create-app"
           disabled={!hasCreateNewApplicationPermission}
-          onSelect={() => onCreateNewApplication(workspace.id)}
+          onSelect={() => onCreateNewApplication(workspace.id, false)}
           startIcon="apps-line"
         >
           {createMessage(NEW_APP)}
@@ -117,6 +118,14 @@ function WorkspaceAction({
             {createMessage(IMPORT_BTN_LABEL)}
           </MenuItem>
         )}
+        <MenuItem
+          data-testid="t--workspace-action-create-app"
+          disabled={!hasCreateNewApplicationPermission}
+          onSelect={() => onCreateNewApplication(workspace.id, true)}
+          startIcon="apps-line"
+        >
+          {createMessage(NEW_MODULE)}
+        </MenuItem>
       </MenuContent>
     </Menu>
   );

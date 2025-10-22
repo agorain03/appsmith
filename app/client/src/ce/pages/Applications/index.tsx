@@ -705,6 +705,7 @@ export function ApplicationsSection(props: any) {
   const createNewApplication = (
     applicationName: string,
     workspaceId: string,
+    isModule: Boolean,
   ) => {
     const color = getRandomPaletteColor(theme.colors.appCardColors);
     const icon =
@@ -715,6 +716,7 @@ export function ApplicationsSection(props: any) {
       payload: {
         applicationName,
         workspaceId,
+        isModule,
         icon,
         color,
       },
@@ -791,7 +793,7 @@ export function ApplicationsSection(props: any) {
       isManageEnvironmentEnabled &&
       hasManageWorkspaceEnvironmentPermission(activeWorkspace.userPermissions);
 
-    const onClickAddNewAppButton = (workspaceId: string) => {
+    const onClickAddNewAppButton = (workspaceId: string, isModule: Boolean) => {
       if (
         Object.entries(creatingApplicationMap).length === 0 ||
         (creatingApplicationMap && !creatingApplicationMap[workspaceId])
@@ -804,6 +806,7 @@ export function ApplicationsSection(props: any) {
             applications.map((el: any) => el.name),
           ),
           workspaceId,
+          isModule,
         );
       }
     };

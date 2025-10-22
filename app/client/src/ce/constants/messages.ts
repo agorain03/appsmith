@@ -288,6 +288,7 @@ export const WHATS_NEW = () => `What's new?`;
 export const WORKSPACE_ACTION_BUTTON = () => "Create new";
 export const NEW_APP = () => "Application";
 export const NEW_APP_FROM_TEMPLATE = () => "Templates";
+export const NEW_MODULE = () => "Module";    
 export const NO_WORKSPACE_HEADING = () => "Oops! No workspace found";
 export const NO_WORKSPACE_DESCRIPTION = () =>
   "You can find workspace list on the left sidebar, try selecting one of them to access a workspace.";
@@ -1414,6 +1415,7 @@ export const API_EDITOR_TAB_TITLES = {
   PAGINATION: () => "Pagination",
   AUTHENTICATION: () => "Authentication",
   SETTINGS: () => "Settings",
+  USER_ACCESS: () => "User Access",
 };
 export const ACTION_EXECUTION_MESSAGE = (actionType: string) =>
   `Sending the ${actionType} request`;
@@ -2380,6 +2382,7 @@ export const EDITOR_PANE_TEXTS = {
   queries_tab: () => "Queries",
   js_tab: () => "JS",
   ui_tab: () => "UI",
+  api_tab: () => "APIs",
   query_blank_state: () => "No queries to display",
   js_blank_state: () => "No JS objects to display",
   query_blank_state_description: () =>

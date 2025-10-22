@@ -8,6 +8,7 @@ import { truncateString, howMuchTimeBeforeText } from "utils/helpers";
 export interface CreateApplicationFormValues {
   applicationName: string;
   workspaceId: string;
+  isModule?: Boolean;
   colorCode?: AppColorCode;
   appName?: AppIconName;
 }
@@ -27,7 +28,7 @@ export const createApplicationFormSubmitHandler = async (
   // TODO: Fix this the next time the file is edited
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
-  const { applicationName, workspaceId } = values;
+  const { applicationName, workspaceId, isModule } = values;
 
   return new Promise((resolve, reject) => {
     dispatch({
@@ -37,6 +38,7 @@ export const createApplicationFormSubmitHandler = async (
         reject,
         applicationName,
         workspaceId,
+        isModule,
       },
     });
   }).catch((error) => {
