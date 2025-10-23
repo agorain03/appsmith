@@ -4,6 +4,9 @@ import com.appsmith.server.domains.ApiUserGroups;
 import com.appsmith.server.domains.UserGroups;
 import com.appsmith.server.repositories.ApiUserGroupsRepository;
 import com.appsmith.server.repositories.UserGroupsRepository;
+import com.appsmith.server.services.keycloak.KeycloakFeature;
+import com.appsmith.server.services.keycloak.KeycloakUserRoleService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,52 +23,63 @@ public class ApiExecutionAccessServiceImpl implements ApiExecutionAccessService 
 
     private final ApiUserGroupsRepository apiUserGroupsRepository;
     private final UserGroupsRepository userGroupsRepository;
+    private final KeycloakUserRoleService keycloakUserRoleService;
+    private final KeycloakFeature keycloakFeature;
 
     @Override
-    public Mono<Boolean> canUserExecute(String apiId, String userId) {
-        if (apiId == null || userId == null) {
+    public Mono<Boolean> canUserExecute(String apiId, String userEmail) {
+        if (apiId == null || userEmail == null) {
             return Mono.just(false);
         }
 
-        Mono<ApiUserGroups> apiGroupsMono = apiUserGroupsRepository.findFirstByApiId(apiId);
-        Mono<UserGroups> userGroupsMono = userGroupsRepository.findFirstByUserId(userId);
+        Mono<ApiUserGroups> apiGroupsMono = apiUserGroupsRepository
+                .findFirstByApiId(apiId)
+                .defaultIfEmpty(new ApiUserGroups());
 
-        return Mono.zip(
-                        apiGroupsMono.defaultIfEmpty(new ApiUserGroups()),
-                        userGroupsMono.defaultIfEmpty(new UserGroups()))
+        Mono<List<String>> userGroupListMono;
+
+        if (keycloakFeature.isEnabled()) {
+            // Fetch from Keycloak realm roles
+            userGroupListMono = keycloakUserRoleService
+                    .getUserRealmRolesByEmail(userEmail)
+                    .map(set -> List.copyOf(set));
+        } else {
+            // Fallback Mongo mechanism
+            userGroupListMono = userGroupsRepository
+                    .findFirstByUserId(userEmail)
+                    .defaultIfEmpty(new UserGroups())
+                    .map(u -> u.getGroup() == null ? List.of() : u.getGroup());
+        }
+
+        return Mono.zip(apiGroupsMono, userGroupListMono)
                 .map(tuple -> {
                     ApiUserGroups apiUserGroups = tuple.getT1();
-                    UserGroups userGroups = tuple.getT2();
-
+                    List<String> userGroups = tuple.getT2();
                     List<String> apiAllowed = apiUserGroups.getUserGroups();
-                    List<String> userGroupList = userGroups.getGroup();
 
-                    // If api has no record -> decide policy. Here we DENY by default.
                     if (apiAllowed == null || apiAllowed.isEmpty()) {
-                        log.debug("No api_user_groups entry for apiId={}, denying by default", apiId);
+                        log.debug("apiId={} has no allowed groups configured; denying by default.", apiId);
+                        return false;
+                    }
+                    if (userGroups == null || userGroups.isEmpty()) {
+                        log.debug("User {} has no groups; denying.", userEmail);
                         return false;
                     }
 
-                    if (userGroupList == null || userGroupList.isEmpty()) {
-                        log.debug("User {} has no groups, denying", userId);
-                        return false;
-                    }
-
-                    log.debug(
-                            "User {} groups {} and API {} allowed groups {}", userId, userGroupList, apiId, apiAllowed);
-
-                    Set<String> userSet = new HashSet<>(userGroupList);
+                    Set<String> userSet = new HashSet<>(userGroups);
                     for (String allowed : apiAllowed) {
                         if (userSet.contains(allowed)) {
                             return true;
                         }
                     }
+
                     log.debug(
-                            "User {} groups {} do not intersect with API {} allowed groups {}",
-                            userId,
-                            userGroupList,
+                            "User {} groups {} do not intersect API {} allowed groups {}",
+                            userEmail,
+                            userGroups,
                             apiId,
-                            apiAllowed);
+                            apiAllowed
+                    );
                     return false;
                 });
     }

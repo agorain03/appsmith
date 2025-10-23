@@ -187,6 +187,7 @@ interface ImportModalProps {
   onClose?: () => void;
   editorId?: string;
   toEditor?: boolean;
+  isModule?: boolean;
 }
 
 function ImportModal(props: ImportModalProps) {
