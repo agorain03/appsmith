@@ -42,6 +42,35 @@ public class KeycloakUserRoleService {
     }
 
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
+    private volatile CacheEntry allRealmRolesCache;
+
+    /**
+     * Returns all realm roles (cached). If Keycloak disabled, returns empty set.
+     */
+    public Mono<List<String>> getAllRealmRoles() {
+        if (!props.isEnabled()) {
+            log.debug("Keycloak disabled: returning empty realm role list");
+            return Mono.just(List.of());
+        }
+
+        long now = System.currentTimeMillis();
+        CacheEntry cached = allRealmRolesCache;
+        if (cached != null && cached.expiresAtMillis > now) {
+            return Mono.just(cached.roles.stream().sorted().toList());
+        }
+
+        return fetchAccessToken()
+                .flatMap(this::fetchAllRealmRoleNames)
+                .doOnNext(roleSet -> {
+                    long ttlMillis = props.getUserRoleCacheTtlSeconds() * 1000L;
+                    allRealmRolesCache = new CacheEntry(roleSet, now + ttlMillis);
+                })
+                .map(set -> set.stream().sorted().toList())
+                .onErrorResume(err -> {
+                    log.warn("Failed to fetch all realm roles: {}", err.getMessage());
+                    return Mono.just(List.of());
+                });
+    }
 
     public Mono<Set<String>> getUserRealmRolesByEmail(String email) {
         log.info("[keycloakUserRoleService] isEnabled {}", props.isEnabled());
@@ -162,5 +191,32 @@ public class KeycloakUserRoleService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet()) 
                 .doOnNext(set -> log.debug("Fetched roles {} for userId={}", set, userId));
+    }
+
+    /* -------- All realm roles -------- */
+
+    private Mono<Set<String>> fetchAllRealmRoleNames(String bearerToken) {
+        String url = props.getServerUrl()
+                + "/admin/realms/" + props.getRealm()
+                + "/roles";
+
+        log.debug("Fetching all realm roles from Keycloak URL={}", url);
+
+        return keycloakWebClient.get()
+                .uri(url)
+                .headers(h -> h.setBearerAuth(bearerToken))
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(String.class)
+                                .defaultIfEmpty("")
+                                .flatMap(body -> {
+                                    log.warn("Fetch all roles error {} body={}", resp.statusCode(), body);
+                                    return Mono.error(new RuntimeException("Keycloak fetch roles failed"));
+                                }))
+                .bodyToFlux(KeycloakRoleRepresentation.class)
+                .map(KeycloakRoleRepresentation::getName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet())
+                .doOnNext(set -> log.info("Fetched {} realm roles from Keycloak", set.size()));
     }
 }
