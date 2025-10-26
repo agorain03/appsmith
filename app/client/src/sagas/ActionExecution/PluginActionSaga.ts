@@ -7,6 +7,8 @@ import {
   take,
   takeLatest,
 } from "redux-saga/effects";
+import { showToastOnExecutionError } from "sagas/ActionExecution/errorUtils";
+
 import {
   clearActionResponse,
   executePageLoadActions,
@@ -163,6 +165,7 @@ import {
   isActionSaving,
   setPluginActionEditorDebuggerState,
 } from "PluginActionEditor/store";
+import showToast from "sagas/ToastSagas";
 import { objectKeys } from "@appsmith/utils";
 import type { Span } from "instrumentation/types";
 import {
@@ -172,6 +175,7 @@ import {
 import { createActionExecutionResponse } from "./PluginActionSagaUtils";
 import { ActionRunBehaviour } from "PluginActionEditor/types/PluginActionTypes";
 import { appsmithTelemetry } from "instrumentation";
+
 
 interface FilePickerInstumentationObject {
   numberOfFiles: number;
@@ -1164,12 +1168,27 @@ function* executePageLoadAction(
       isError = executePluginActionResponse.isError;
     } catch (e) {
       log.error(e);
-
+      console.log(e);
+      console.log("GOT ERROR IN PAGE LOAD ACTION+++++++++++++++++++=", (e as any).message);
       if (e instanceof UserCancelledActionExecutionError) {
         error = {
           name: "PluginExecutionError",
           message: createMessage(ACTION_EXECUTION_CANCELLED, actionName),
         };
+      }
+      // Preserve unauthorized error surface similar to manual RUN path.
+      // executePluginActionSaga will throw PluginActionExecutionError for AE-ACL-4003.
+      // Without this, on-page-load swallows it and shows generic failure.
+      // We detect and override the error message for clarity.
+      else if ((e as any).message === "Unauthorized API access") {
+        console.log("HERE IN 401 ERROR BLOCK+++++++++++++++++++=");
+        error = {
+          name: "PluginExecutionError",
+          message: "Unauthorized API access",
+        };
+        yield call(showToastOnExecutionError, "Unauthorized API access", false);
+        
+        throw new PluginActionExecutionError("Unauthorized access - 401", false);
       }
     }
 
@@ -1314,6 +1333,19 @@ function* executePageLoadActionsSaga(
     checkAndLogErrorsIfCyclicDependency(layoutOnLoadActionErrors);
   } catch (e) {
     log.error(e);
+    if (
+        e instanceof PluginActionExecutionError &&
+        // support either custom message variants
+        (typeof (e as any).message === "string" &&
+          ((e as any).message.includes("Unauthorized API access") ||
+            (e as any).message.includes("Unauthorized access - 401")))
+      ) {
+        // error = {
+        //   name: "PluginExecutionError",
+        //   message: "Unauthorized API access",
+        // };
+        throw new PluginActionExecutionError("Unauthorized access - 401", false);
+      }
     AppsmithConsole.error({
       text: createMessage(ERROR_FAIL_ON_PAGE_LOAD_ACTIONS),
     });
@@ -1424,7 +1456,7 @@ function* executePluginActionSaga(
     response = yield ActionAPI.executeAction(formData, timeout);
     if(response.responseMeta?.error?.code === "AE-ACL-4003"){
       console.log("THROWING CUSTOM ERROR")
-      throw new PluginActionExecutionError("Unauthorized access - 401", true);
+      throw new PluginActionExecutionError("Unauthorized access - 401", false);
     }
 
     const isError = isErrorResponse(response);

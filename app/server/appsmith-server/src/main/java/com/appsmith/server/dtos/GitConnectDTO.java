@@ -20,4 +20,5 @@ public class GitConnectDTO {
      * consumed packages, hence we would override prod package with same UUID.
      */
     Boolean override;
+    Boolean isModule;
 }

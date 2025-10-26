@@ -621,6 +621,11 @@ export function ApplicationsSection(props: any) {
     setIsCreateAppFromTemplateModalOpen,
   ] = useState(false);
 
+  const [
+    isModuleApp,
+    setIsModuleApp,
+  ] = useState(false)
+
   useEffect(() => {
     // Clears URL params cache
     urlBuilder.resetURLParams();
@@ -861,6 +866,7 @@ export function ApplicationsSection(props: any) {
                 }
                 onClose={() => setSelectedWorkspaceIdForImportApplication("")}
                 workspaceId={selectedWorkspaceIdForImportApplication}
+                isModule={isModuleApp}
               />
             )}
             <CreateNewAppFromTemplatesWrapper

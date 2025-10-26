@@ -321,6 +321,7 @@ public class GitApplicationHelperCEImpl implements GitArtifactHelperCE<Applicati
         Application newApplication = new Application();
         newApplication.setName(repoName);
         newApplication.setWorkspaceId(workspaceId);
+        newApplication.setIsModule(false);
         newApplication.setGitApplicationMetadata(new GitArtifactMetadata());
         return newApplication;
     }

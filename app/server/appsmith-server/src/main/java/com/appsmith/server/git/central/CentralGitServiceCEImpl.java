@@ -98,6 +98,10 @@ import static com.appsmith.server.constants.FieldName.DEFAULT;
 import static com.appsmith.server.constants.FieldName.REF_NAME;
 import static com.appsmith.server.constants.FieldName.REF_TYPE;
 import static com.appsmith.server.constants.SerialiseArtifactObjective.VERSION_CONTROL;
+import static com.appsmith.server.constants.ce.FieldNameCE.BRANCH_NAME;
+import static com.appsmith.server.constants.ce.FieldNameCE.DEFAULT;
+import static com.appsmith.server.constants.ce.FieldNameCE.REF_NAME;
+import static com.appsmith.server.constants.ce.FieldNameCE.REF_TYPE;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.springframework.util.StringUtils.hasText;
@@ -365,6 +369,7 @@ public class CentralGitServiceCEImpl implements CentralGitServiceCE {
             String repoName,
             String uniqueIdentifier) {
         GitArtifactHelper<?> contextHelper = gitArtifactHelperResolver.getArtifactHelper(artifactType);
+        log.info("CREATING GIT APPLICATION ++++++++++++++++++");
         return contextHelper.createArtifactForImport(workspaceId, repoName);
     }
 

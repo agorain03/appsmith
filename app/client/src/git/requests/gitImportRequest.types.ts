@@ -10,6 +10,7 @@ export interface GitImportRequestParams {
     useDefaultProfile?: boolean;
   };
   override?: boolean;
+  isModule?: boolean;
 }
 
 export interface GitImportResponseData {
@@ -17,6 +18,7 @@ export interface GitImportResponseData {
   package?: GitPackageArtifact;
   isPartialImport: boolean;
   unConfiguredDatasourceList?: Datasource[];
+  isModule?: boolean;
 }
 
 export type GitImportResponse = ApiResponse<GitImportResponseData>;

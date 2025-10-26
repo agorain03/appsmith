@@ -50,6 +50,7 @@ export type GitApplicationMetadata =
       isRepoPrivate?: boolean;
       browserSupportedRemoteUrl: string;
       defaultApplicationId: string;
+      isModule?: boolean,
     }
   | undefined;
 

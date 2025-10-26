@@ -205,6 +205,7 @@ function GitConnectionV2({ isImport = false }: GitConnectionV2Props) {
                     remoteUrl: formData.remoteUrl,
                     gitProfile,
                     // isDefaultProfile: true,
+                    isModule: false,
                   },
                   onErrorCallback(error, response) {
                     const errorResponse = response || error?.response?.data;

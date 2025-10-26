@@ -83,7 +83,7 @@ import { jsCollectionIdURL } from "ee/RouteBuilder";
 import type { ApiResponse } from "api/ApiResponses";
 import { ModalType } from "reducers/uiReducers/modalActionReducer";
 import { requestModalConfirmationSaga } from "sagas/UtilSagas";
-import { UserCancelledActionExecutionError } from "sagas/ActionExecution/errorUtils";
+import { PluginActionExecutionError, UserCancelledActionExecutionError } from "sagas/ActionExecution/errorUtils";
 import type { EventLocation } from "ee/utils/analyticsUtilTypes";
 import AnalyticsUtil from "ee/utils/AnalyticsUtil";
 import { checkAndLogErrorsIfCyclicDependency } from "./helper";
@@ -461,6 +461,7 @@ export function* handleExecuteJSFunctionSaga(data: {
   onPageLoad: boolean;
   openDebugger?: boolean;
 }) {
+  console.log("JS EXECUTION STARTED");
   const { action, collection, onPageLoad, openDebugger = false } = data;
   const { id: collectionId } = collection;
   const actionId = action.id;
@@ -570,6 +571,8 @@ export function* handleExecuteJSFunctionSaga(data: {
       });
     }
   } catch (error) {
+    console.log("JS EXECUTION ERROR", error);
+
     // open response tab in debugger on runnning js action.
     if (doesURLPathContainCollectionId) {
       yield put(
@@ -582,7 +585,7 @@ export function* handleExecuteJSFunctionSaga(data: {
 
     if (!!collection.isMainJSCollection)
       logMainJsActionExecution(actionId, false, collectionId, false);
-
+    console.log(")))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
     AppsmithConsole.addErrors([
       {
         payload: {

@@ -29,6 +29,7 @@ export interface ConnectToGitPayload {
     authorEmail: string;
     useDefaultProfile?: boolean;
   };
+  isModule?: boolean;
 }
 
 interface GitStatusParam {

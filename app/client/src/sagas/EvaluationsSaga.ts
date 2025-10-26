@@ -461,7 +461,7 @@ export function* evaluateAndExecuteDynamicTrigger(
   const unEvalTree: ReturnType<typeof getUnevaluatedDataTree> = yield call(
     getUnevalTreeWithWidgetsRegistered,
   );
-
+  console.log("JS EXECUTION STARTED");
   endSpan(rootSpan);
 
   log.debug({ execute: dynamicTrigger });
@@ -493,7 +493,7 @@ export function* evaluateAndExecuteDynamicTrigger(
     errors: transformedErrors,
     triggerMeta,
   });
-
+  console.log("JS EXECUTION RESPONSE", response);
   return response;
 }
 
