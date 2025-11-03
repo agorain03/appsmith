@@ -16,6 +16,7 @@ import {
 import { DEBUGGER_TAB_KEYS } from "components/editorComponents/Debugger/constants";
 import store from "store";
 import showToast from "sagas/ToastSagas";
+import { showUnauthorizedToast } from "sagas/ToastSagas";
 import { call, put } from "redux-saga/effects";
 
 /*
@@ -82,6 +83,23 @@ export function* showToastOnExecutionError(
   yield call(showToast, errorMessage, {
     kind: "error",
     action,
+  });
+}
+
+export function* showUnauthorizedExecutionErrorToast(
+  showCTA = false,
+) {
+  yield showUnauthorizedToast("Unauthorized API access", {
+    // if CTA needed, pass action here
+    action: showCTA
+      ? {
+          text: "debug",
+          effect: () => {
+            AnalyticsUtil.logEvent("OPEN_DEBUGGER", { source: "TOAST_UNAUTHORIZED" });
+            store.dispatch(showDebuggerLogs());
+          },
+        }
+      : undefined,
   });
 }
 

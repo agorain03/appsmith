@@ -1,5 +1,5 @@
 import type { ToastProps } from "@appsmith/ads";
-import { toast } from "@appsmith/ads";
+import { toast, unauthToast } from "@appsmith/ads";
 import { APP_MODE } from "entities/App";
 import { select } from "redux-saga/effects";
 import { getAppMode } from "ee/selectors/entitiesSelector";
@@ -34,4 +34,27 @@ export default function* showToast(
   }
 
   toast.show(message, options);
+}
+
+export function* showUnauthorizedToast(
+  message: string,
+  options?: ToastProps,
+  extraOptions?: ExtraOptions,
+) {
+  const appMode: APP_MODE | undefined = yield select(getAppMode);
+  const urlObject = new URL(window?.location?.href);
+  const debugFlag = urlObject?.searchParams?.get("debug");
+  const debug = debugFlag === "true" || debugFlag;
+
+  if (appMode === APP_MODE.PUBLISHED && !debug && !extraOptions?.forceDisplay) {
+    log.error(message);
+    return;
+  }
+
+  // Enforce error kind and custom class hook if not provided
+  unauthToast.show(message, {
+    kind: "error",
+    className: `t--toast-unauthorized ${options?.className || ""}`,
+    ...options,
+  });
 }

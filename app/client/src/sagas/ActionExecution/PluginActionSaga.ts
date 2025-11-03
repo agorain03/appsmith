@@ -7,7 +7,7 @@ import {
   take,
   takeLatest,
 } from "redux-saga/effects";
-import { showToastOnExecutionError } from "sagas/ActionExecution/errorUtils";
+import { showToastOnExecutionError, showUnauthorizedExecutionErrorToast } from "sagas/ActionExecution/errorUtils";
 
 import {
   clearActionResponse,
@@ -1186,7 +1186,7 @@ function* executePageLoadAction(
           name: "PluginExecutionError",
           message: "Unauthorized API access",
         };
-        yield call(showToastOnExecutionError, "Unauthorized API access", false);
+        yield call(showUnauthorizedExecutionErrorToast, false);
         
         throw new PluginActionExecutionError("Unauthorized access - 401", false);
       }
@@ -1523,7 +1523,8 @@ function* executePluginActionSaga(
     console.log("ERROR IN ACTION EXECTION CUSTOM HANDLER", (e as any).message, e);
 
     if((e as any).message === "Unauthorized access - 401"){
-      throw new PluginActionExecutionError("Unauthorized API access", true);
+      yield call(showUnauthorizedExecutionErrorToast, true);
+      // throw new PluginActionExecutionError("Unauthorized API access", true);
     }
 
     if ("clientDefinedError" in (e as any)) {
